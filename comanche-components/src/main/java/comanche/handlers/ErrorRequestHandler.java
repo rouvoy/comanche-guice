@@ -12,6 +12,6 @@ public class ErrorRequestHandler implements RequestHandler {
 	 */
 	public void handleRequest(Request r) throws IOException {
 		r.out.write("HTTP/1.0 404 Not Found\n\n".getBytes());
-		r.out.write("Comanche: document not found.".getBytes());
+		r.out.write("<html><h1>[Comanche] File not found</h1></html>".getBytes());
 	}
 }

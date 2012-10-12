@@ -18,54 +18,44 @@ public class RequestReceiver implements Runnable {
 	// private RequestAnalyzer rh = new RequestAnalyzer();
 	private final RequestHandler rh;
 
-	private final int port;
+	private final ServerSocket ss;;
 
 	@Inject
 	private PrintStream out;
-	
+
 	@Inject
 	public RequestReceiver(Scheduler s, @Named("analyzer") RequestHandler rh,
-			@Named("port") int port) {
+			ServerSocket socket) {
 		this.s = s;
 		this.rh = rh;
-		this.port = port;
+		this.ss = socket;
 	}
 
-	// functional aspect
+	@Override
 	public void run() {
-		new Thread(new Runnable() {
-
-			public void run() {
-				try {
-					ServerSocket ss = new ServerSocket(port);
-					out.println("HTTP Server ready on port " + port);
-					while (true) {
-						final Socket socket = ss.accept();
-						s.schedule(new Runnable() {
-							public void run() {
-								try {
-									Request r = new Request(socket);
-									rh.handleRequest(r);
-									socket.close();
-								} catch (Exception _) {
-									try {
-										socket.close();
-									} catch (IOException e) {
-										throw new RuntimeException(
-												"this should never happen");
-									}
-									/**
-									 * Nothing else, the server must keep on
-									 * working
-									 */
-								}
+		try {
+			out.println("HTTP Server ready on port " + ss.getLocalPort());
+			while (true) {
+				final Socket socket = ss.accept();
+				s.schedule(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							rh.handleRequest(new Request(socket));
+							socket.close();
+						} catch (Exception _) {
+							try {
+								socket.close();
+							} catch (IOException e) {
+								throw new RuntimeException(
+										"This should never happen");
 							}
-						});
+						}
 					}
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
+				});
 			}
-		}).start();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
