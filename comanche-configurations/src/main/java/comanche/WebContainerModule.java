@@ -58,7 +58,6 @@ public class WebContainerModule extends AbstractModule {
 	}
 
 	private static class DateProvider implements Provider<Date> {
-		@Override
 		public Date get() {
 			return new Date();
 		}

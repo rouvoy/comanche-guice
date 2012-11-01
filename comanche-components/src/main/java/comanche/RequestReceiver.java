@@ -18,7 +18,7 @@ public class RequestReceiver implements Runnable {
 	// private RequestAnalyzer rh = new RequestAnalyzer();
 	private final RequestHandler rh;
 
-	private final ServerSocket ss;;
+	private final ServerSocket ss;
 
 	@Inject
 	private PrintStream out;
@@ -31,14 +31,12 @@ public class RequestReceiver implements Runnable {
 		this.ss = socket;
 	}
 
-	@Override
 	public void run() {
 		try {
 			out.println("HTTP Server ready on port " + ss.getLocalPort());
 			while (true) {
 				final Socket socket = ss.accept();
 				s.schedule(new Runnable() {
-					@Override
 					public void run() {
 						try {
 							rh.handleRequest(new Request(socket));
